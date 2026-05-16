@@ -78,6 +78,13 @@ def print_status(message: str, status: str = "info"):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Logger
+# ─────────────────────────────────────────────────────────────────────────────
+
+from core_engine.logger import get_logger
+logger = get_logger("main")
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Lazy imports (avoid slow startup)
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -148,24 +155,28 @@ def render_status_panel():
 
 def cmd_chat():
     """Interactive chat mode with the local LLM."""
-    console.rule("[bold cyan]Chat Mode[/bold cyan]")
-    console.print("  Send AST JSON or plain questions. Type [bold]exit[/bold] or [bold]quit[/bold] to return.\n")
+    console.print("  [bold cyan]Architect-JS[/bold cyan]  [dim]— type [bold]exit[/bold] to quit[/dim]\n")
 
     if not check_llama_server():
-        console.print(Panel(
-            "[yellow]llama-server is not running.[/yellow]\n\n"
-            "Start it with:\n"
-            "[bold cyan]  .\\llama-server.exe -m models\\architect-js-1.5b-unsloth.Q4_K_M.gguf -c 2048 --port 8080[/bold cyan]",
-            title="⚠  Server Offline",
-            border_style="yellow",
-        ))
+        console.print(
+            "  [yellow]⚠  llama-server is not running.[/yellow] "
+            "Start it with: [bold cyan].\\llama-server.exe -m models\\qwen2.5-coder-1.5b-instruct-q4_k_m.gguf -c 2048 --port 8080[/bold cyan]\n"
+        )
         if not Confirm.ask("  Continue anyway (for testing)?", default=False):
             return
 
     from core_engine.llm_client import LLMClient, LlamaServerError
-    client = LLMClient()
+    from core_engine.rag.pipeline import RagPipeline
+    from core_engine.intent import classify_intent, HistoryTurn
 
-    history_count = 0
+    client = LLMClient()
+    rag = RagPipeline()
+
+    # Conversation history buffer — used ONLY by the intent classifier.
+    # Capped at 6 turns to bound memory usage. NOT injected into LLM prompts.
+    conv_history: list = []  # list[HistoryTurn]
+    _MAX_HISTORY = 6
+
     while True:
         try:
             user_input = Prompt.ask("\n  [bold green]You[/bold green]").strip()
@@ -179,19 +190,65 @@ def cmd_chat():
         if not user_input:
             continue
 
-        history_count += 1
+        # ── 1. Classify intent ────────────────────────────────────────────────
+        intent = classify_intent(user_input, conv_history)
+        logger.debug(
+            f"Intent: {intent.intent.value} | tone={intent.tone.value} "
+            f"| depth={intent.depth.value} | wants_code={intent.wants_code} "
+            f"| needs_rag={intent.needs_rag} | verbosity={intent.verbosity.value} "
+            f"| scores={intent.scores}"
+        )
 
-        with console.status("[cyan]Thinking...[/cyan]", spinner="dots"):
+        # ── 2. Conditionally retrieve context ─────────────────────────────────
+        context = ""
+        source_type = "none"
+
+        if intent.needs_rag:
+            with console.status("[dim]Searching context...[/dim]", spinner="dots"):
+                chunks, context = rag.retrieve(user_input)
+                source_type = getattr(rag, "_last_source_type", "codebase")
+
+        # ── 3. Generate response ──────────────────────────────────────────────
+        with console.status("[dim]Thinking...[/dim]", spinner="dots"):
             try:
-                result = client.complete(user_input)
+                if context:
+                    result = client.rag_complete(
+                        user_input, context,
+                        source_type=source_type,
+                        intent=intent,
+                    )
+                else:
+                    result = client.complete_with_intent(user_input, intent)
+                    source_type = "none"
             except LlamaServerError as e:
                 console.print(f"\n  [red]Error:[/red] {e}")
                 continue
 
+        # ── 4. Update conversation history for next turn's classifier ─────────
+        conv_history.append(HistoryTurn(
+            role="user",
+            content=user_input,
+            intent=intent.intent,
+            tone=intent.tone,
+        ))
+        conv_history.append(HistoryTurn(role="assistant", content=result.content))
+        if len(conv_history) > _MAX_HISTORY * 2:
+            conv_history = conv_history[-(  _MAX_HISTORY * 2):]
+
+        # ── 5. Render ─────────────────────────────────────────────────────────
+        source_icon = {
+            "web":     " [cyan]\U0001f310 web[/cyan]",
+            "hybrid":  " [cyan]\U0001f310+\U0001f4c1 hybrid[/cyan]",
+            "codebase": " [dim]\U0001f4c1 local[/dim]",
+        }.get(source_type, "")
+
         console.print()
         console.print(Panel(
             result.content,
-            title=f"[bold blue]Architect-JS[/bold blue]  ({result.latency_ms}ms | {result.tokens_predicted} tokens)",
+            title=(
+                f"[bold blue]Architect-JS[/bold blue]{source_icon}  "
+                f"[dim]({result.latency_ms}ms | {result.tokens_predicted} tokens)[/dim]"
+            ),
             border_style="blue",
             padding=(1, 2),
         ))
@@ -255,8 +312,9 @@ def cmd_rag_query(query: Optional[str] = None):
     with console.status("[cyan]Generating answer with context...[/cyan]", spinner="dots"):
         from core_engine.llm_client import LLMClient, LlamaServerError
         client = LLMClient()
+        source_type = getattr(rag, "_last_source_type", "codebase")
         try:
-            result = client.rag_complete(query, context)
+            result = client.rag_complete(query, context, source_type=source_type)
         except LlamaServerError as e:
             console.print(f"\n  [red]LLM Error:[/red] {e}")
             return
@@ -514,10 +572,10 @@ def cli(ctx):
     """
     Architect-JS — Local-First AI Coding Assistant
 
-    Run without a subcommand to open the interactive menu.
+    Run without a subcommand to open an interactive chat session.
     """
     if ctx.invoked_subcommand is None:
-        interactive_menu()
+        cmd_chat()
 
 
 @cli.command()

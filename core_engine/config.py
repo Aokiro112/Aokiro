@@ -23,7 +23,7 @@ class LlamaConfig:
     port: int = field(default_factory=lambda: int(os.getenv("LLAMA_SERVER_PORT", "8080")))
     model_path: str = field(default_factory=lambda: os.getenv("LLAMA_MODEL_PATH", "models/architect-js-1.5b-unsloth.Q4_K_M.gguf"))
     temperature: float = field(default_factory=lambda: float(os.getenv("LLAMA_TEMPERATURE", "0.1")))
-    max_tokens: int = field(default_factory=lambda: int(os.getenv("LLAMA_MAX_TOKENS", "512")))
+    max_tokens: int = field(default_factory=lambda: int(os.getenv("LLAMA_MAX_TOKENS", "-1")))
     context_size: int = field(default_factory=lambda: int(os.getenv("LLAMA_CONTEXT_SIZE", "2048")))
 
 
@@ -56,11 +56,22 @@ class DataConfig:
 
 
 @dataclass(frozen=True)
+class WebSearchConfig:
+    enabled: bool = field(default_factory=lambda: os.getenv("WEB_SEARCH_ENABLED", "true").lower() == "true")
+    google_api_key: str = field(default_factory=lambda: os.getenv("GOOGLE_API_KEY", ""))
+    google_cse_id: str = field(default_factory=lambda: os.getenv("GOOGLE_CSE_ID", ""))
+    max_results: int = field(default_factory=lambda: int(os.getenv("WEB_SEARCH_MAX_RESULTS", "4")))
+    # Minimum local similarity score below which web search kicks in (0.0–1.0)
+    fallback_threshold: float = field(default_factory=lambda: float(os.getenv("WEB_SEARCH_FALLBACK_THRESHOLD", "0.45")))
+
+
+@dataclass(frozen=True)
 class Config:
     llama: LlamaConfig = field(default_factory=LlamaConfig)
     rag: RagConfig = field(default_factory=RagConfig)
     log: LogConfig = field(default_factory=LogConfig)
     data: DataConfig = field(default_factory=DataConfig)
+    web_search: WebSearchConfig = field(default_factory=WebSearchConfig)
 
     @property
     def completion_endpoint(self) -> str:

@@ -13,6 +13,8 @@ python-dotenv>=1.0.0
 chromadb>=0.5.0
 sentence-transformers>=3.0.0
 pypdf>=4.2.0
+duckduckgo-search>=6.1.0          # Web search fallback (wrapper, installs ddgs)
+ddgs>=6.1.0                       # DuckDuckGo search — free, no API key required
 
 # ── Data Mining ──────────────────────────────────────────────
 pydriller>=2.6.0
