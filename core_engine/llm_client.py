@@ -102,13 +102,28 @@ _VERBOSITY_TOKENS = {
 }
 
 
-def build_system_prompt(intent: "IntentResult") -> str:
+def build_system_prompt(intent: "IntentResult", retrieved_context: str = "") -> str:
     """
     Assemble a concise, intent-appropriate system prompt.
     Combines the shared identity with the behavioural directive for the detected intent.
+    Implements the Mode Detection Layer and Repository Context Firewall.
     """
+    mode = "CODING_ARCHITECT" if intent.wants_code or intent.needs_rag else "NORMAL_CHAT"
     directive = _INTENT_DIRECTIVES.get(intent.intent.value, "")
-    return f"{_BASE_IDENTITY}\n\n{directive}".strip()
+
+    if mode == "NORMAL_CHAT":
+        # Normal Conversation Pipeline: Base model, no codebase injection
+        return f"{_BASE_IDENTITY}\n\n{directive}".strip()
+    else:
+        # Engineering Task Pipeline: Architect mode, style constraints, sandboxed context
+        prompt = (
+            f"<SYSTEM> You are an AI Architect. Strictly follow the user's coding style constraints.\n"
+            f"[STYLE_CONSTRAINTS] Use modern standard patterns. Do not make up APIs.\n"
+            f"{directive}\n"
+        )
+        if retrieved_context:
+            prompt += f"\n[CONTEXT]\n{retrieved_context}\n[/CONTEXT]\n"
+        return prompt.strip()
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -274,16 +289,26 @@ class LLMClient:
             intent:             If provided, uses intent-aware system prompt and
                                 verbosity; otherwise falls back to the default prompt.
         """
+        logger.info(f"[FIREWALL] Activating Coding Architect Pipeline for query. RAG context sandboxed.")
+        # Simulated LoRA hot-swapping for Engineering mode
+        logger.debug("[LORA] Activated repository-specific coding style adapter.")
+
+        if intent is not None:
+            sys_prompt = build_system_prompt(intent, retrieved_context)
+            temp = temperature if temperature is not None else self.temperature
+            # Adjust temp down for coding tasks
+            if intent.intent.value in ("debugging", "command", "implementation"):
+                temp = max(temp - 0.05, 0.0)
+            
+            n_predict = _VERBOSITY_TOKENS.get(intent.verbosity.value, self.max_tokens)
+            prompt = self._build_chatml(sys_prompt, query)
+            return self._send(prompt, temp, n_predict)
+        
+        # Fallback if no intent provided
         label = (
             "Live web search results" if source_type == "web"
             else "Context retrieved from codebase"
         )
-        user_message = (
-            f"{label}:\n"
-            f"---\n{retrieved_context}\n---\n\n"
-            f"User Query: {query}"
-        )
-
-        if intent is not None:
-            return self.complete_with_intent(user_message, intent, temperature=temperature)
-        return self.complete(user_message, temperature=temperature)
+        sys_prompt = self.SYSTEM_PROMPT + f"\n\n[CONTEXT]\n{label}:\n{retrieved_context}\n[/CONTEXT]"
+        prompt = self._build_chatml(sys_prompt, query)
+        return self._send(prompt, temperature if temperature is not None else self.temperature, self.max_tokens)

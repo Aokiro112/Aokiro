@@ -23,6 +23,11 @@ export interface ParsedState extends ParsedEntity {
   initialValue?: string;
 }
 
+export interface ParsedSocketEvent extends ParsedEntity {
+  eventName: string;
+  isEmit: boolean;
+}
+
 export interface ParsedEffect extends ParsedEntity {
   dependencies?: string[];
 }
@@ -34,6 +39,7 @@ export interface ParsedComponent extends ParsedEntity {
   effects: ParsedEffect[];
   jsxElements: ParsedJSX[];
   functionCalls: ParsedFunctionCall[];
+  socketEvents: ParsedSocketEvent[];
 }
 
 export interface ParsedFunctionCall extends ParsedEntity {
@@ -50,4 +56,5 @@ export interface ExtractedAST {
   exports: ParsedExport[];
   components: ParsedComponent[];
   topLevelFunctions: ParsedFunctionCall[];
+  socketEvents: ParsedSocketEvent[];
 }

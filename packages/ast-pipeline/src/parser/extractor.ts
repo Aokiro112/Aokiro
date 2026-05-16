@@ -9,7 +9,8 @@ import {
   ParsedHook,
   ParsedEffect,
   ParsedJSX,
-  ParsedFunctionCall
+  ParsedFunctionCall,
+  ParsedSocketEvent
 } from './types';
 
 // Workaround for CJS/ESM interop with babel/traverse
@@ -20,6 +21,7 @@ export function extractASTInfo(ast: t.File): ExtractedAST {
   const exports: ParsedExport[] = [];
   const components: ParsedComponent[] = [];
   const topLevelFunctions: ParsedFunctionCall[] = [];
+  const socketEvents: ParsedSocketEvent[] = [];
 
   // Helper to get name from node
   const getName = (node: t.Node | null | undefined): string => {
@@ -88,10 +90,28 @@ export function extractASTInfo(ast: t.File): ExtractedAST {
           components.push(extractComponent(path));
         }
       }
+    },
+    CallExpression(path: any) {
+      const callee = path.node.callee;
+      if (t.isMemberExpression(callee)) {
+        const objName = (callee.object as any)?.name || (callee.object as any)?.property?.name;
+        const propName = (callee.property as any)?.name;
+        if ((objName === 'socket' || objName === 'io') && (propName === 'on' || propName === 'emit')) {
+          const args = path.node.arguments;
+          if (args.length > 0 && t.isStringLiteral(args[0])) {
+            socketEvents.push({
+              name: objName,
+              eventName: args[0].value,
+              isEmit: propName === 'emit',
+              loc: path.node.loc
+            });
+          }
+        }
+      }
     }
   });
 
-  return { imports, exports, components, topLevelFunctions };
+  return { imports, exports, components, topLevelFunctions, socketEvents };
 }
 
 function extractComponent(path: any): ParsedComponent {
@@ -123,12 +143,27 @@ function extractComponent(path: any): ParsedComponent {
   const effects: ParsedEffect[] = [];
   const jsxElements: ParsedJSX[] = [];
   const functionCalls: ParsedFunctionCall[] = [];
+  const socketEvents: ParsedSocketEvent[] = [];
 
   if (functionNode && functionNode.body) {
     path.traverse({
       CallExpression(childPath: any) {
         const callee = childPath.node.callee;
-        if (t.isIdentifier(callee)) {
+        if (t.isMemberExpression(callee)) {
+          const objName = (callee.object as any)?.name || (callee.object as any)?.property?.name;
+          const propName = (callee.property as any)?.name;
+          if ((objName === 'socket' || objName === 'io') && (propName === 'on' || propName === 'emit')) {
+            const args = childPath.node.arguments;
+            if (args.length > 0 && t.isStringLiteral(args[0])) {
+              socketEvents.push({
+                name: objName,
+                eventName: args[0].value,
+                isEmit: propName === 'emit',
+                loc: childPath.node.loc
+              });
+            }
+          }
+        } else if (t.isIdentifier(callee)) {
           const funcName = callee.name;
           if (funcName.startsWith('use')) {
             if (funcName === 'useState') {
@@ -203,6 +238,7 @@ function extractComponent(path: any): ParsedComponent {
     effects,
     jsxElements,
     functionCalls,
+    socketEvents,
     loc: node.loc
   };
 }

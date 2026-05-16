@@ -49,6 +49,19 @@ export function compressAST(extracted: ExtractedAST): Record<string, CompressedN
     });
   });
 
+  // Add Global Socket Events
+  extracted.socketEvents.forEach(evt => {
+    const id = generateDeterministicId('SocketEvent', evt.name, evt.eventName, evt.loc?.start.line || 0);
+    addNode({
+      id,
+      type: 'SocketEvent',
+      name: evt.eventName,
+      value: evt.isEmit ? 'emit' : 'on',
+      children: [],
+      loc: transformLoc(evt.loc)
+    });
+  });
+
   // Add Components
   extracted.components.forEach(comp => {
     const compId = generateDeterministicId('Component', comp.name, comp.loc?.start.line || 0);
@@ -131,6 +144,20 @@ export function compressAST(extracted: ExtractedAST): Record<string, CompressedN
         loc: transformLoc(call.loc)
       });
       childrenIds.push(callId);
+    });
+
+    // Socket Events inside component
+    comp.socketEvents.forEach((evt, i) => {
+      const evtId = generateDeterministicId('SocketEvent', comp.name, evt.eventName, i);
+      addNode({
+        id: evtId,
+        type: 'SocketEvent',
+        name: evt.eventName,
+        value: evt.isEmit ? 'emit' : 'on',
+        children: [],
+        loc: transformLoc(evt.loc)
+      });
+      childrenIds.push(evtId);
     });
 
     addNode({

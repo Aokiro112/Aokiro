@@ -15,7 +15,8 @@ export const NodeTypeSchema = z.enum([
   'State',
   'Effect',
   'JSX',
-  'Prop'
+  'Prop',
+  'SocketEvent'
 ]);
 
 export const CompressedNodeSchema = z.object({
@@ -37,7 +38,9 @@ export const EdgeTypeSchema = z.enum([
   'renders',
   'has_prop',
   'contains',
-  'depends_on'
+  'depends_on',
+  'emits_socket',
+  'listens_socket'
 ]);
 
 export const GraphEdgeSchema = z.object({
