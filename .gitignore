@@ -83,3 +83,4 @@ llama-*.exe
 rpc-server.exe
 *.dll
 llama-cuda.zip
+llama_*.txt
