@@ -1,0 +1,43 @@
+# ============================================================
+# Architect-JS — Core Engine Requirements
+# ============================================================
+
+# CLI & Terminal UI
+rich>=13.7.0
+click>=8.1.7
+
+# Environment loading
+python-dotenv>=1.0.0
+
+# ============================================================
+# RAG Pipeline
+# ============================================================
+
+# Vector store (local, persistent)
+chromadb>=0.5.0
+
+# Local embeddings (no API needed)
+sentence-transformers>=3.0.0
+
+# PDF ingestion (optional)
+pypdf>=4.2.0
+
+# ============================================================
+# Data Mining (src/miner/github_scraper.py)
+# ============================================================
+
+pydriller>=2.6.0
+GitPython>=3.1.41
+
+# ============================================================
+# ML Training (src/training/train_unsloth.py)
+# NOTE: Install these separately in a CUDA-enabled env.
+# Unsloth requires CUDA — use Google Colab for training.
+# Uncomment below only if running on GPU with CUDA 12+:
+# ============================================================
+
+# transformers>=4.40.0
+# trl>=0.8.6
+# datasets>=2.19.0
+# torch>=2.2.0
+# unsloth>=2024.5.1

@@ -1,0 +1,29 @@
+{
+  "name": "architect-js",
+  "version": "1.0.0",
+  "description": "Local-first AI coding assistant with AST compression and RAG",
+  "private": true,
+  "scripts": {
+    "setup": "npm run install:analyzer && npm run install:pipeline",
+    "install:analyzer": "cd src/analyzer && npm install",
+    "install:pipeline": "cd packages/ast-pipeline && npm install",
+    "build": "npm run build:pipeline",
+    "build:pipeline": "cd packages/ast-pipeline && npm run build",
+    "test": "npm run test:analyzer && npm run test:pipeline",
+    "test:analyzer": "cd src/analyzer && npm test",
+    "test:pipeline": "cd packages/ast-pipeline && npm test",
+    "typecheck": "cd packages/ast-pipeline && npx tsc --noEmit",
+    "compress": "node src/analyzer/ast_compressor.js",
+    "build-dataset": "node src/analyzer/build_dataset.js",
+    "eval": "node src/distiller/inference_test.js",
+    "cli": "python core_engine/main.py",
+    "index": "python core_engine/main.py index",
+    "query": "python core_engine/main.py query"
+  },
+  "keywords": ["ast", "llm", "react", "typescript", "rag", "local-ai"],
+  "author": "Aokiro",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

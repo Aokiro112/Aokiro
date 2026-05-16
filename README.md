@@ -1,167 +1,109 @@
-# Architect-JS 🏛️
+# Aokiro 🏛️
 
 ![Local-First AI](https://img.shields.io/badge/Local--First-AI-blue)
 ![Zero-Cost Pipeline](https://img.shields.io/badge/Pipeline-Zero--Cost-brightgreen)
 ![AST Compression](https://img.shields.io/badge/AST-Compression-orange)
-![QLoRA](https://img.shields.io/badge/Training-QLoRA-purple)
+![RAG Pipeline](https://img.shields.io/badge/Architecture-Python%20RAG-red)
 ![llama.cpp](https://img.shields.io/badge/Inference-llama.cpp-yellow)
-![React/TypeScript Specialization](https://img.shields.io/badge/Specialization-React%20%7C%20TypeScript-blueviolet)
 
 > **A highly specialized, local-first AI coding assistant that thinks like a Senior Software Architect.**
 
-Architect-JS represents a paradigm shift in local LLM coding assistants. Instead of feeding large, noisy, raw source code files into context windows, Architect-JS reads **compressed Abstract Syntax Tree (AST) & Dependency Graph JSON representations**. This allows a 1.5B parameter model running on consumer hardware (e.g., RTX 3050 4GB) to reason about massive codebases with zero cloud dependency.
+Aokiro (formerly Architect-JS) represents a paradigm shift in local LLM coding assistants. Instead of feeding large, noisy, raw source code files into context windows, Aokiro reads **compressed Abstract Syntax Tree (AST) & Dependency Graph JSON representations**. This allows a 1.5B parameter model running on consumer hardware (e.g., RTX 3050 4GB) to reason about massive codebases with zero cloud dependency.
 
 ---
 
-## 🎯 Project Goals & Local-First Philosophy
+## 🎯 What is this project? (Project Overview)
 
-The goal of Architect-JS is to bring Senior Staff Engineer level architectural reasoning to local, low-resource hardware. 
-Cloud APIs (OpenAI, Anthropic) are powerful but expensive, slow, and pose privacy risks. By combining a $0-cost automated training pipeline, deterministic AST extraction, and aggressive `Q4_K_M` quantization via `llama.cpp`, we enable deep codebase intelligence entirely offline.
+Aokiro is a specialized, local-first AI coding assistant that acts like a Senior Software Architect. It uses a hybrid system combining **Node.js** (for parsing source code into a compressed Abstract Syntax Tree) and **Python** (for running a Retrieval-Augmented Generation (RAG) engine). 
 
-## 🧠 Why Compressed AST over Raw Code?
-
-Traditional coding models struggle with long-context memory degradation and VRAM exhaustion. An average React component might be 500 lines of code (~5,000 tokens). By parsing the file with Babel and extracting *only* the architectural skeleton (hooks, imports, exports, dependency arrays, child elements), we compress the context to **~70-150 tokens**. 
-
-This 50x token compression allows the model to "see" multiple files simultaneously without overflowing KV caches on a 4GB GPU.
+It allows you to analyze, chat with, and debug your codebases entirely offline on local hardware, without paying for expensive cloud APIs and with zero privacy risks.
 
 ---
 
-## 🏗️ Architecture & Pipeline Overview
+## 🧠 How it works (Architecture Flow)
 
-Architect-JS operates on a strict, deterministic pipeline divided into distinct engines:
+Traditional coding models struggle with long-context memory degradation and VRAM exhaustion. An average React component might be 500 lines of code (~5,000 tokens). By parsing the file and extracting *only* the architectural skeleton, we compress the context to **~70-150 tokens**.
+
+1. **AST Extraction (Node.js)**: Parses React/TypeScript files and extracts only the structural skeleton (hooks, imports, exports, dependency arrays, child elements).
+2. **Context Compression**: Compresses the code logic into highly token-efficient JSON graphs.
+3. **RAG Pipeline (Python)**: Indexes these parsed JSON elements into a local Vector Database. When you query the codebase, it retrieves only the relevant AST nodes.
+4. **Local LLM Inference**: Sends the compressed context to a locally running model using `llama.cpp` to generate strict architectural reasoning and code diffs.
 
 ```mermaid
 graph TD
-    A[React/TSX Source] -->|Babel Parser| B(AST Compressor)
-    B -->|Compresses to < 100 Tokens| C{JSON AST}
-    C -->|Input| D[Qwen2.5-Coder-1.5B-GGUF]
-    D -->|Strict Output Schema| E(Reasoning Block)
-    D -->|Unified Patch| F(Diff Block)
-    E --> G[Local Evaluation Engine]
-    F --> G
-```
-
-### Folder Structure
-```text
-architect-js/
-├── data/
-│   ├── manual_fixes.json     # Ground truth SFT reasoning
-│   ├── test_ast/             # Extracted JSON outputs
-│   ├── test_files/           # Raw React/TSX benchmark files
-│   └── train.jsonl           # Final compiled dataset
-├── src/
-│   ├── analyzer/             # Babel AST extraction & formatting
-│   ├── distiller/            # Validation, inference testing, semantic scoring
-│   └── training/             # Unsloth / QLoRA Colab scripts
-├── docs/                     # Architecture & design documents
-├── logs/failures/            # LLM benchmark failure dumps
-├── README.md
-└── VALIDATION.md
+    A[React/TSX Source] -->|Node.js Babel Parser| B(AST Compressor)
+    B -->|Compresses Context| C{JSON AST}
+    C -->|Indexed by| D[(Vector DB / Python RAG)]
+    D -->|Retrieved Context| E[Local Llama.cpp Server]
+    E -->|Generates| F(Reasoning & Code Patch)
 ```
 
 ---
 
-## 🚀 Features Completed So Far
-- [x] **Zero-Cost Training Pipeline:** No paid APIs used.
-- [x] **AST Compressor Engine:** Babel-based extraction of imports, hooks, and relationships.
-- [x] **Strict Token Management:** Automatic `tiktoken` enforcement (< 3500 tokens).
-- [x] **SFT Dataset Compiler:** Automated merging of ASTs with ground-truth reasoning.
-- [x] **Evaluation Infrastructure:** Built-in inference tester targeting local `llama.cpp` servers.
-- [x] **Colab Integration:** 1-click Unsloth Jupyter notebook for training Qwen2.5.
+## ✅ What has been done (Current Features)
+
+- **Node.js AST Compressor Engine**: Built Babel-based extraction of React/TSX structures, imports, hooks, and relationships.
+- **Python RAG Core Engine**: Implemented a fully functional local RAG pipeline with vector search capabilities.
+- **Cross-Language Bridge**: Stabilized the connection between the Node.js AST parsing pipeline and the Python RAG Engine.
+- **Local Inference Integration**: Integrated `llama.cpp` server for zero-cost, local model execution without cloud dependencies.
+- **CLI Interface**: Deployed a production-ready Python command-line tool for codebase indexing and interaction.
+- **Zero-Cost Training Pipeline**: Setup complete for training custom models via QLoRA.
 
 ---
 
-## 💡 Example Data Flow
-
-### 1. Compressed AST Input (JSON)
-```json
-{
-  "file": "ChatBox.tsx",
-  "exports": ["ChatBox"],
-  "imports": ["react", "socket.io-client"],
-  "hooks": ["useEffect", "useState", "useAuth"],
-  "deps": {
-    "useEffect": ["roomId", "handleMsg"]
-  },
-  "children": ["MessageBubble"]
-}
-```
-
-### 2. Model Output (`<thought>` / `<diff>`)
-```xml
-<thought>
-The useEffect initiates a websocket connection but fails to return a cleanup function. This will result in memory leaks and duplicate socket listeners upon component re-render. We must return a function that calls socket.off() and socket.disconnect().
-</thought>
-<diff>
-@@ -15,4 +15,5 @@
-   useEffect(() => {
-     socket.on('message', handleMsg);
-+    return () => socket.off('message', handleMsg);
-   }, []);
-</diff>
-```
-
----
-
-## ⚙️ Installation & Quick Start
+## ⚙️ Detailed Installation Guide (How to Install)
 
 ### Prerequisites
-- Node.js v18+
-- Python 3.10+
-- `llama.cpp` (compiled locally)
+- Node.js (v18+)
+- Python (3.10+)
+- `llama.cpp` pre-compiled binaries (specifically `llama-server.exe` on Windows).
 
-### Setup
-```bash
-# Install Node dependencies
-cd src/analyzer && npm install
+### Step 1: Download `llama.cpp` Server
+To run models locally, you need the `llama-server` binary:
+1. Go to the `llama.cpp` [releases page](https://github.com/ggerganov/llama.cpp/releases).
+2. Download the appropriate pre-compiled Windows zip (e.g., `cuda` for Nvidia GPUs, or `vulkan`).
+3. Extract the `.zip` file and find `llama-server.exe`.
+4. Copy `llama-server.exe` and paste it directly into your Aokiro project root directory (`c:\Aokiro`).
 
-# Install Python ML dependencies
-cd ../../
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+### Step 2: Run the Automated Setup
+Aokiro provides scripts to automatically create a Python virtual environment, install Python requirements, and build the Node.js packages.
+
+**On Windows:**
+```powershell
+.\setup.bat
 ```
 
-### Usage Examples
-**1. Compress a React Component**
+**On Mac/Linux:**
 ```bash
-node src/analyzer/ast_compressor.js ./path/to/Component.tsx
+./setup.sh
 ```
 
-**2. Compile the SFT Dataset**
-```bash
-node src/analyzer/build_dataset.js
+### Step 3: Configure Environment Variables
+Copy the template environment file to activate your settings:
+```powershell
+copy .env.example .env
+```
+*(The default `.env` configuration already points to the local `llama-server` on port 8080)*
+
+### Step 4: Run the Local LLM Server
+Start the local server using your downloaded GGUF model. **Leave this running in its own terminal.**
+
+```powershell
+.\llama-server.exe -m models\architect-js-1.5b-unsloth.Q4_K_M.gguf -c 2048 --port 8080
 ```
 
-**3. Evaluate Local Inference Model**
-*(Requires `llama-server` running on port 8080)*
-```bash
-node src/distiller/inference_test.js
+### Step 5: Start the Aokiro Core Engine
+Open a **new** terminal window, activate the virtual environment, and launch the interactive CLI to start indexing and chatting with your codebase!
+
+```powershell
+# Activate the environment
+.\.venv\Scripts\activate
+
+# Launch the CLI
+python core_engine\main.py
 ```
 
----
-
-## 🛠️ Development & Contribution
-
-> [!WARNING]  
-> **Experimental Research Prototype**  
-> Architect-JS is actively under development. The AST schema is subject to breaking changes. Do not use generated patches directly in production without manual review.
-
-### Contribution Guidelines
-We welcome contributions particularly in:
-1. Expanding the `jscodeshift` synthetic bug mutation heuristics.
-2. Adding static analysis hooks for non-React frameworks (Vue, Svelte).
-3. Improving the `inference_test.js` compilation checks.
-
-Please read `VALIDATION.md` for strict local testing requirements before submitting PRs.
-
-### Current Limitations
-- The AST compressor currently drops deeply nested inline-functions to save tokens.
-- TypeScript compiler validation assumes standard `tsconfig.json` paths.
-- Local inference requires roughly ~1.5GB of VRAM for the Q4_K_M model.
-
-### Future Research Directions
-- Implementing **Direct Preference Optimization (DPO)** tournaments locally using ESLint cyclomatic complexity scores as the reward model.
-- Expanding AST graph parsing to include global state managers (Redux, Zustand).
-- Multi-file repository ingestion and vector-db AST mapping.
-# Aokiro
+### Useful CLI Commands
+Once inside the Python CLI, you can use:
+- `python core_engine\main.py index --path data\` (To index a specific folder)
+- `python core_engine\main.py query "useEffect cleanup"` (To ask a question based on indexed code)

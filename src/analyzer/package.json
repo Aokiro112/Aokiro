@@ -1,19 +1,24 @@
 {
   "name": "analyzer",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Architect-JS Babel AST extraction and dataset compilation tools",
+  "main": "ast_compressor.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "compress": "node ast_compressor.js",
+    "build-dataset": "node build_dataset.js",
+    "validate": "node babel_validator.js",
+    "test": "node tests/parser.test.js",
+    "lint": "echo \"No linter configured for src/analyzer\""
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["ast", "babel", "react", "typescript", "compression"],
+  "author": "Aokiro",
+  "license": "MIT",
   "type": "module",
   "dependencies": {
     "@babel/parser": "^7.29.3",
     "@babel/traverse": "^7.29.0",
     "commander": "^14.0.3",
+    "jscodeshift": "^0.16.1",
     "tiktoken": "^1.0.22"
   }
 }
