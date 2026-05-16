@@ -1,5 +1,5 @@
 """
-Architect-JS Core Engine — LLM Client
+Aokiro Core Engine — LLM Client
 Thin HTTP client for local llama.cpp server (/completion endpoint).
 """
 from __future__ import annotations
@@ -40,7 +40,7 @@ class LlamaServerError(Exception):
 
 # Base identity shared by all prompts — kept short intentionally
 _BASE_IDENTITY = (
-    "You are Architect-JS, a senior developer and technical collaborator. "
+    "You are Aokiro, a senior developer and technical collaborator. "
     "You specialise in React, React Native, Node.js, TypeScript, and JavaScript. "
     "You never make up APIs or package names."
 )

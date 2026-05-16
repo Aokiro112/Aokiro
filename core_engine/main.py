@@ -1,5 +1,5 @@
 """
-Architect-JS Core Engine — Full Terminal CLI
+Aokiro Core Engine — Full Terminal CLI
 Interactive menu system for all core functions.
 """
 from __future__ import annotations
@@ -155,7 +155,7 @@ def render_status_panel():
 
 def cmd_chat():
     """Interactive chat mode with the local LLM."""
-    console.print("  [bold cyan]Architect-JS[/bold cyan]  [dim]— type [bold]exit[/bold] to quit[/dim]\n")
+    console.print("  [bold cyan]Aokiro[/bold cyan]  [dim]— type [bold]exit[/bold] to quit[/dim]\n")
 
     if not check_llama_server():
         console.print(
@@ -246,7 +246,7 @@ def cmd_chat():
         console.print(Panel(
             result.content,
             title=(
-                f"[bold blue]Architect-JS[/bold blue]{source_icon}  "
+                f"[bold blue]Aokiro[/bold blue]{source_icon}  "
                 f"[dim]({result.latency_ms}ms | {result.tokens_predicted} tokens)[/dim]"
             ),
             border_style="blue",
@@ -514,7 +514,7 @@ def interactive_menu():
         ("6", "📋  View Logs", "Show recent application logs"),
         ("7", "⚙  Config", "View current configuration"),
         ("8", "🔄  Refresh Status", "Refresh system status"),
-        ("q", "🚪  Quit", "Exit Architect-JS"),
+        ("q", "🚪  Quit", "Exit Aokiro"),
     ]
 
     while True:
@@ -570,7 +570,7 @@ def interactive_menu():
 @click.pass_context
 def cli(ctx):
     """
-    Architect-JS — Local-First AI Coding Assistant
+    Aokiro — Local-First AI Coding Assistant
 
     Run without a subcommand to open an interactive chat session.
     """
