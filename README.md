@@ -289,4 +289,4 @@ From the Aokiro interface, you can:
 
 ---
 
-*Aokiro — MIT License 2026.*
+*Aokiro*
