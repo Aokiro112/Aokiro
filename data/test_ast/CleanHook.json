@@ -1,0 +1,17 @@
+{
+  "file": "CleanHook.tsx",
+  "exports": [
+    "useToggle"
+  ],
+  "imports": [
+    "react"
+  ],
+  "hooks": [
+    "useState",
+    "useCallback"
+  ],
+  "deps": {
+    "useCallback": []
+  },
+  "children": []
+}

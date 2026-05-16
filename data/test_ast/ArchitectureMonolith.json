@@ -1,0 +1,18 @@
+{
+  "file": "ArchitectureMonolith.tsx",
+  "exports": [
+    "Monolith"
+  ],
+  "imports": [
+    "react",
+    "axios"
+  ],
+  "hooks": [
+    "useState",
+    "useEffect"
+  ],
+  "deps": {
+    "useEffect": []
+  },
+  "children": []
+}

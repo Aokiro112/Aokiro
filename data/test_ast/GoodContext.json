@@ -1,0 +1,18 @@
+{
+  "file": "GoodContext.tsx",
+  "exports": [
+    "ThemeProvider",
+    "useTheme"
+  ],
+  "imports": [
+    "react"
+  ],
+  "hooks": [
+    "useState",
+    "useContext"
+  ],
+  "deps": {},
+  "children": [
+    "ThemeContext.Provider"
+  ]
+}

@@ -1,0 +1,4 @@
+{
+  "system": "You are Architect-JS. You receive compressed AST graphs. Output reasoning in <thought> and exact code patches in <diff>.",
+  "input": "User: Analyze this component.\nContext: {\n  \"file\": \"CartTracker.tsx\",\n  \"exports\": [\"CartTracker\"],\n  \"imports\": [\"react\", \"../store/cart\"],\n  \"hooks\": [\"useEffect\", \"useState\", \"useCart\"],\n  \"deps\": {\n    \"useEffect\": [\"cartItems\"]\n  },\n  \"children\": [\"CartItem\", \"CheckoutButton\"]\n}"
+}

@@ -1,0 +1,15 @@
+{
+  "file": "PropDrilling.tsx",
+  "exports": [
+    "Parent"
+  ],
+  "imports": [
+    "react",
+    "./GrandChild"
+  ],
+  "hooks": [],
+  "deps": {},
+  "children": [
+    "Child"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "file": "ComplexComponent.tsx",
+  "exports": [
+    "Complex"
+  ],
+  "imports": [
+    "react",
+    "./CleanHook",
+    "./Header"
+  ],
+  "hooks": [
+    "useToggle",
+    "useMemo"
+  ],
+  "deps": {
+    "useMemo": [
+      "items"
+    ]
+  },
+  "children": [
+    "Header"
+  ]
+}

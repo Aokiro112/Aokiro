@@ -1,0 +1,16 @@
+{
+  "file": "BuggyMemoryLeak.tsx",
+  "exports": [
+    "MemoryLeak"
+  ],
+  "imports": [
+    "react"
+  ],
+  "hooks": [
+    "useEffect"
+  ],
+  "deps": {
+    "useEffect": []
+  },
+  "children": []
+}

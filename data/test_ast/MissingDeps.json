@@ -1,0 +1,17 @@
+{
+  "file": "MissingDeps.tsx",
+  "exports": [
+    "UserProfile"
+  ],
+  "imports": [
+    "react"
+  ],
+  "hooks": [
+    "useState",
+    "useEffect"
+  ],
+  "deps": {
+    "useEffect": []
+  },
+  "children": []
+}

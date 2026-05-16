@@ -1,0 +1,18 @@
+{
+  "file": "UselessMemo.tsx",
+  "exports": [
+    "BadMemo"
+  ],
+  "imports": [
+    "react"
+  ],
+  "hooks": [
+    "useMemo"
+  ],
+  "deps": {
+    "useMemo": [
+      "name"
+    ]
+  },
+  "children": []
+}

@@ -1,0 +1,18 @@
+{
+  "file": "CleanComponent.tsx",
+  "exports": [
+    "Profile"
+  ],
+  "imports": [
+    "react",
+    "../hooks/useAuth"
+  ],
+  "hooks": [
+    "useAuth"
+  ],
+  "deps": {},
+  "children": [
+    "Login",
+    "ProfileCard"
+  ]
+}

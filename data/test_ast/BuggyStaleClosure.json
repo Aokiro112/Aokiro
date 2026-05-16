@@ -1,0 +1,17 @@
+{
+  "file": "BuggyStaleClosure.tsx",
+  "exports": [
+    "Counter"
+  ],
+  "imports": [
+    "react"
+  ],
+  "hooks": [
+    "useState",
+    "useEffect"
+  ],
+  "deps": {
+    "useEffect": []
+  },
+  "children": []
+}
