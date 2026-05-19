@@ -1,86 +1,63 @@
-# ==========================================
-# Architect-JS — .gitignore
-# ==========================================
+# Dependencies
+node_modules/
+dist/
+build/
+.next/
+
+# Virtual Environments
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Aokiro Data & Caches
+datasets/
+outputs/
+models/
+workspace/repos/
+data/rag_db/
+data/train.jsonl
+logs/
+project_chat_application/
+
+# Testing & Artifacts
+AokiroTodoManager/
+generated_projects/
+validation_outputs/
+temporary_artifacts/
+scratch/
+
+# Machine Learning
+runs/
+*tb_logs*
 
 # Environment
 .env
 .env.local
-.env.*.local
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-.venv/
-venv/
-env/
-ENV/
-*.egg-info/
-dist/
-build/
-*.egg
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-
-# Node.js
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-*.tsbuildinfo
-
-# TypeScript build output
-packages/*/dist/
-
-# Logs
-logs/*.log
-logs/failures/
-
-# Dataset outputs (large, generated files)
-datasets/v1_synthetic/*.jsonl
-datasets/v2_mined/*.json
-datasets/v3_hybrid/*.jsonl
-
-# ChromaDB persistent store
-data/rag_db/
-
-# ML Models
-models/
-*.gguf
-*.ggml
-*.bin
-*.safetensors
-
-# Training outputs
-outputs/
-runs/
-checkpoints/
-
-# Jupyter
-.ipynb_checkpoints/
-*.ipynb~
-
-# OS
+# OS / Editor
 .DS_Store
 Thumbs.db
-desktop.ini
-
-# IDE
-.vscode/settings.json
+.vscode/
 .idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
 *.swp
-*.swo
 
-# Temp files
-*.tmp
-*.temp
-
-# llama.cpp binaries (do not commit — large files)
-llama-*.exe
-rpc-server.exe
+# Binaries
+*.exe
 *.dll
-llama-cuda.zip
-llama_*.txt
+*.so
+*.dylib
+*.class
+
+# Archives and Logs
+*.zip
+llama_error.txt
+llama_out.txt
+*.log
