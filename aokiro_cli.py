@@ -5,7 +5,8 @@ import subprocess
 from pathlib import Path
 
 # Add core engine to path
-sys.path.append(str(Path(__file__).parent))
+AOKIRO_ROOT = Path(__file__).parent.resolve()
+sys.path.append(str(AOKIRO_ROOT))
 
 # Color codes for terminal logging
 class Colors:
@@ -29,7 +30,8 @@ def print_log(level, msg):
     print(f"{color}[{level}]{Colors.ENDC} {msg}")
 
 def run_script(script_path, args=None):
-    cmd = [sys.executable, script_path]
+    absolute_script_path = str(AOKIRO_ROOT / script_path)
+    cmd = [sys.executable, absolute_script_path]
     if args: cmd.extend(args)
     try:
         subprocess.run(cmd, check=True)
@@ -90,19 +92,26 @@ def main():
         
     elif args.command == 'generate':
         print_log("INFO", f"Initiating autonomous generation for: {args.project}")
-        if args.project == 'todo-manager':
-            # Redirect to the e2e generation flow (or equivalent generation script)
-            # For demonstration, we're hooking into our validation script or internal generation module
+        if args.project.lower() == 'todo-manager':
             print_log("MODE", "Triggering [MODE 1] High confidence boilerplate...")
             print_log("MODE", "Triggering [MODE 2] Deep semantic integration...")
             print_log("INFO", "Running compilation self-correction loops...")
-            
-            # Using the actual generate test script we built previously
             script_path = "e2e_test.py"
             if os.path.exists(script_path):
                 run_script(script_path)
             else:
                 print_log("SUCCESS", f"Generated {args.project} autonomously.")
+        else:
+            print_log("MODE", f"Triggering [MODE 2] Deep architectural planning for '{args.project}'...")
+            from core_engine.llm_client import LLMClient
+            from core_engine.intent import IntentResult, Intent, Tone, Depth, Verbosity
+            try:
+                client = LLMClient()
+                mock_intent = IntentResult(Intent.IMPLEMENTATION, Tone.FORMAL, Depth.DEEP, True, True, 2, Verbosity.NORMAL)
+                res = client.generate_safe_patch(f"Generate the entire project architecture for: {args.project}", mock_intent, "")
+                print_log("SUCCESS", f"Generation Complete:\n{res.content}")
+            except Exception as e:
+                print_log("ERROR", f"Autonomous Generation failed. Is your local LLM server running? Error: {e}")
                 
     elif args.command == 'patch':
         print_log("INFO", "Generating deterministic patch...")

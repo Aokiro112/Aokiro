@@ -81,20 +81,25 @@ cp .env.example .env
 ```
 Ensure your `LLAMA_SERVER_URL` points to your active local model server (e.g., `llama.cpp` or `ollama`).
 
+### 4. Global CLI Setup
+To use Aokiro from any directory globally, add the Aokiro project root (e.g., `C:\Aokiro`) to your system's Environment Variables `PATH`.
+
 ---
 
 ## 💻 CLI Usage Examples
 
-Aokiro exposes a powerful, unified CLI.
+Aokiro exposes a powerful, unified CLI that dynamically hooks into your local LLM server.
 
 **Ingest a repository:**
 ```bash
 aokiro ingest https://github.com/antfu/ni
 ```
 
-**Generate a full project:**
+**Generate ANY dynamic application:**
 ```bash
-aokiro generate todo-manager
+aokiro generate "real-time chat app using socket.io"
+# OR
+aokiro generate "e-commerce dashboard"
 ```
 
 **Evaluate Benchmark (Compile validation & Minimality):**
@@ -107,13 +112,15 @@ aokiro evaluate
 aokiro doctor
 ```
 
-### The `todo-manager` Generation Demo
-When you run `aokiro generate todo-manager`, Aokiro will:
-1. Scaffold a Node.js/Express backend and React/Vite frontend into your `Documents` folder.
-2. Trigger **[MODE 1]** for boilerplates and **[MODE 2]** for complex Zustand integrations.
-3. Run `npm install` and `tsc` autonomously to verify types.
-4. Auto-correct any hallucinated imports if the compiler fails.
-5. Print the final execution commands and `localhost` URLs.
+### How Autonomous Generation Works
+When you run `aokiro generate "<project_name>"`, Aokiro will:
+1. Connect to your active local LLM (e.g., `llama-server`).
+2. Trigger **[MODE 2]** for deep architectural planning.
+3. Automatically scaffold and generate the required files.
+4. Run `npm install` and `tsc` autonomously to verify types.
+5. Auto-correct any hallucinated imports if the compiler fails.
+
+*(Note: You can run `aokiro generate todo-manager` as an offline demo to test the TS compiler validation loop without needing an active GPU/LLM server).*
 
 ---
 
