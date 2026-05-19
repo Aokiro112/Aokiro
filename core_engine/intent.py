@@ -60,6 +60,7 @@ class IntentResult:
     depth:     Depth
     wants_code: bool    # Should the LLM generate code?
     needs_rag:  bool    # Should RAG retrieval be triggered?
+    generation_mode: int # Mode 1 (Internal) or Mode 2 (RAG)
     verbosity:  Verbosity
     # Internal scores exposed for debugging / logging
     scores:    dict = field(default_factory=dict)
@@ -646,6 +647,10 @@ def classify_intent(
     verbosity = _derive_verbosity(depth, winning_intent, tone)
     wants_code = _derive_wants_code(winning_intent)
     needs_rag  = _derive_needs_rag(winning_intent, tokens)
+    
+    # Phase 3: Hybrid Generation Mode
+    top_score = total[winning_intent]
+    generation_mode = 1 if (top_score > 2.5 and not needs_rag) else 2
 
     return IntentResult(
         intent     = winning_intent,
@@ -653,6 +658,7 @@ def classify_intent(
         depth      = depth,
         wants_code = wants_code,
         needs_rag  = needs_rag,
+        generation_mode = generation_mode,
         verbosity  = verbosity,
         scores     = {k.value: round(v, 3) for k, v in total.items()},
     )

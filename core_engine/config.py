@@ -48,6 +48,7 @@ class LogConfig:
 class DataConfig:
     data_dir: str = field(default_factory=lambda: os.getenv("DATA_DIR", "./data"))
     datasets_dir: str = field(default_factory=lambda: os.getenv("DATASETS_DIR", "./datasets"))
+    repos_dir: str = field(default_factory=lambda: os.getenv("REPOS_DIR", "./workspace/repos"))
     train_file: str = field(default_factory=lambda: os.getenv("TRAIN_FILE", "./data/train.jsonl"))
     manual_fixes_file: str = field(default_factory=lambda: os.getenv("MANUAL_FIXES_FILE", "./data/manual_fixes.json"))
     unseen_test_file: str = field(default_factory=lambda: os.getenv("UNSEEN_TEST_FILE", "./data/unseen_test.json"))

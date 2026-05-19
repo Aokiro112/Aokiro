@@ -2,7 +2,7 @@
 
 import fs from 'fs';
 import { Command } from 'commander';
-import { extractAST } from './parser.js';
+import { extractASTInfo, parseFile, compressAST } from '../../packages/ast-pipeline/dist/index.js';
 import { validateTokenLimit } from './utils/token_counter.js';
 import path from 'path';
 
@@ -26,7 +26,9 @@ program
       const filename = path.basename(absolutePath);
 
       // Parse the code
-      const compressedAST = extractAST(code, filename);
+      const ast = parseFile(code, filename);
+      const extractedInfo = extractASTInfo(ast);
+      const compressedAST = compressAST(extractedInfo);
 
       // Convert to minimal JSON string
       const jsonString = JSON.stringify(compressedAST, null, 2);

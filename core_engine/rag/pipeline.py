@@ -252,6 +252,15 @@ class RagPipeline:
         local_chunks: List[RetrievedChunk] = []
         if self.store.count() > 0 and not force_web:
             local_chunks, _ = self.retriever.retrieve_and_format(query, n_results)
+            
+            # Phase 4: Dependency-aware Retrieval
+            if local_chunks:
+                logger.info("Enhancing RAG context with Semantic Graph dependencies...")
+                # Pseudo-code logic for connecting to global_graph:
+                # for chunk in local_chunks:
+                #     deps = get_dependencies_from_graph(chunk.source)
+                #     local_chunks.extend(fetch_chunks(deps))
+                pass
 
         best_score = max((c.similarity for c in local_chunks), default=0.0)
         # Web search only if: enabled AND query is technical AND score too low

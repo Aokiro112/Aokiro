@@ -1,10 +1,15 @@
 import os
+import sys
+from pathlib import Path
 from datasets import load_dataset
 from trl import SFTTrainer
 from transformers import TrainingArguments
 from unsloth import FastLanguageModel
 from unsloth.chat_templates import get_chat_template
 import torch
+
+sys.path.append(str(Path(__file__).parent.parent.parent))
+from core_engine.config import get_config
 
 max_seq_length = 2048 # We can keep this small because our JSON is <200 tokens
 dtype = None
@@ -55,8 +60,16 @@ def formatting_prompts_func(examples):
         texts.append(text)
     return {"text": texts}
 
-dataset = load_dataset("json", data_files="../../data/train.jsonl", split="train")
-dataset = dataset.map(formatting_prompts_func, batched=True)
+cfg = get_config()
+train_file = cfg.data.train_file
+
+print(f"[*] Loading dataset from {train_file}...")
+try:
+    dataset = load_dataset("json", data_files=train_file, split="train")
+    dataset = dataset.map(formatting_prompts_func, batched=True)
+except Exception as e:
+    print(f"[-] Failed to load dataset: {e}")
+    sys.exit(1)
 
 # 4. Train
 # We are intentionally overfitting our small 10-row dataset to verify format compliance
@@ -72,7 +85,7 @@ trainer = SFTTrainer(
         per_device_train_batch_size = 2,
         gradient_accumulation_steps = 4,
         warmup_steps = 5,
-        max_steps = 60, # 60 steps on 10 rows = massive overfit (which is the goal for formatting test)
+        max_steps = 60, # Keep small for testing, but in prod change to num_train_epochs
         learning_rate = 2e-4,
         fp16 = not torch.cuda.is_bf16_supported(),
         bf16 = torch.cuda.is_bf16_supported(),
@@ -82,11 +95,14 @@ trainer = SFTTrainer(
         lr_scheduler_type = "linear",
         seed = 3407,
         output_dir = "outputs",
+        save_strategy = "epoch", # Phase 3: Save checkpoints per epoch
+        save_total_limit = 3,
+        report_to = "tensorboard", # Phase 3: Store loss curves
     ),
 )
 
 print("Starting Unsloth Fast Training...")
-trainer_stats = trainer.train()
+trainer_stats = trainer.train(resume_from_checkpoint=True) # Phase 3: Resume support
 
 # 5. Export for llama.cpp testing
 # Export to 4-bit GGUF for the RTX 3050 locally

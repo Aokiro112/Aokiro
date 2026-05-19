@@ -211,7 +211,9 @@ def cmd_chat():
         # ── 3. Generate response ──────────────────────────────────────────────
         with console.status("[dim]Thinking...[/dim]", spinner="dots"):
             try:
-                if context:
+                if intent.wants_code:
+                    result = client.generate_safe_patch(user_input, intent, context)
+                elif context:
                     result = client.rag_complete(
                         user_input, context,
                         source_type=source_type,
