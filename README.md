@@ -116,9 +116,9 @@ aokiro doctor
 When you run `aokiro generate "<project_name>"`, Aokiro will:
 1. Connect to your active local LLM (e.g., `llama-server`).
 2. Trigger **[MODE 2]** for deep architectural planning.
-3. Automatically scaffold and generate the required files.
-4. Run `npm install` and `tsc` autonomously to verify types.
-5. Auto-correct any hallucinated imports if the compiler fails.
+3. Automatically parse the LLM's architecture blueprint.
+4. **Physically create** the project directory, sub-folders, and code files directly inside your `Documents` folder (e.g., `Documents\project_name\`).
+5. Run compiler validations (like `tsc`) autonomously to verify types.
 
 *(Note: You can run `aokiro generate todo-manager` as an offline demo to test the TS compiler validation loop without needing an active GPU/LLM server).*
 

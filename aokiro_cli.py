@@ -2,6 +2,7 @@ import argparse
 import sys
 import os
 import subprocess
+import re
 from pathlib import Path
 
 # Add core engine to path
@@ -38,6 +39,33 @@ def run_script(script_path, args=None):
     except subprocess.CalledProcessError as e:
         print_log("ERROR", f"Command failed with exit code {e.returncode}")
         sys.exit(e.returncode)
+
+def parse_and_scaffold(project_name, llm_content):
+    docs_dir = Path(os.path.expanduser('~')) / "Documents"
+    safe_name = project_name.replace(" ", "_").replace("-", "_").replace("\"", "")
+    project_dir = docs_dir / safe_name
+    
+    # Regex to find: ### FILE: <path>\n```lang\n<code>\n```
+    pattern = r"### FILE:\s*([^\n]+)\n```\w*\n(.*?)\n```"
+    matches = re.findall(pattern, llm_content, re.DOTALL)
+    
+    if not matches:
+        print_log("WARN", "No files matched strict format. Ensure LLM followed '### FILE: path' format. Raw Output:")
+        print(llm_content)
+        return
+
+    os.makedirs(project_dir, exist_ok=True)
+    print_log("SUCCESS", f"Project initialized at: {project_dir}")
+    
+    for filepath_raw, code in matches:
+        filepath = filepath_raw.strip()
+        full_path = project_dir / filepath
+        os.makedirs(full_path.parent, exist_ok=True)
+        with open(full_path, "w", encoding="utf-8") as f:
+            f.write(code)
+        print_log("SUCCESS", f"Wrote file: {filepath}")
+        
+    print_log("SUCCESS", "Autonomous generation and scaffolding complete!")
 
 def main():
     parser = argparse.ArgumentParser(
@@ -108,8 +136,11 @@ def main():
             try:
                 client = LLMClient()
                 mock_intent = IntentResult(Intent.IMPLEMENTATION, Tone.FORMAL, Depth.DEEP, True, True, 2, Verbosity.NORMAL)
-                res = client.generate_safe_patch(f"Generate the entire project architecture for: {args.project}", mock_intent, "")
-                print_log("SUCCESS", f"Generation Complete:\n{res.content}")
+                
+                system_prompt = f"Generate the full project architecture for: {args.project}\n\nYou MUST format EVERY file like this strictly:\n\n### FILE: path/to/filename.ext\n```language\n// code here\n```\n"
+                
+                res = client.generate_safe_patch(system_prompt, mock_intent, "")
+                parse_and_scaffold(args.project, res.content)
             except Exception as e:
                 print_log("ERROR", f"Autonomous Generation failed. Is your local LLM server running? Error: {e}")
                 
